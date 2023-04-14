@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
-const port = 3001
+const port = 3000
+
+app.use(express.json())
 
 const USERS = [
   {
@@ -109,7 +111,7 @@ app.post('/signup', (req, res) => {
   USERS.push(newUser);
 
   // return back 200 status code to the client
-  res.status(2000).send('Welcome to LeetCode');
+  res.status(200).send('Welcome to LeetCode');
 })
 
 
@@ -162,8 +164,8 @@ app.post("/submissions", (req, res) => {
    // Store the submission in the SUBMISSION array above
    const { userID, questionID, code } = req.body;
 
-   const ifExist = USERS.find(user => user.userID === userID );
-   const qs = QUESTIONS.find(question => question.questionID === questionID );
+   const ifExist = USERS.some((user) => {return user.userID === userID } );
+   const qs = QUESTIONS.some((question) => {return question.questionID === questionID} );
 
    if(!ifExist || !qs){
     res.status(400).send('User does not exist');
