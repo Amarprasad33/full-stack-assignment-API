@@ -1,8 +1,14 @@
-const express = require('express')
-const app = express()
+const express = require("express");
+const app = express();
 const port = 3000
+const cookieParser = require("cookie-parser");
 
+
+
+// Middlewares
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const USERS = [
   {
@@ -95,6 +101,11 @@ const SUBMISSION = [
       accepted: true,
     },
 ]
+
+// Routes
+app.get("/", (req, res) => {
+  res.send("Your app is working --> Home page")
+})
  
 app.post('/signup', (req, res) => {
   // Add logic to decode body
@@ -105,6 +116,7 @@ app.post('/signup', (req, res) => {
   const ifExist = USERS.find(user => user.email === email);
   if(ifExist){
     res.status(400).send('User on same email already exits');
+    return
   }
   const random = Math.floor(Math.random() * 1000)+1;
   const newUser = {random, email, password};
@@ -124,7 +136,6 @@ app.post('/login', (req, res) => {
   // Check if the user with the given email exists in the USERS array
   const userExist = USERS.find(user => user.email === email);
   // Also ensure that the password is the same
-  
   // If the password is the same, return back 200 status code to the client
   // Also send back a token (any random string will do for now)
   // If the password is not the same, return back 401 status code to the client
@@ -149,13 +160,16 @@ app.get("/submissions/:userID/:questionID", (req, res) => {
    // return the users submissions for this problem
    const { userID, questionID } = req.params;
 
-   const existSubmissions = SUBMISSION.filter((sub) => {
-    sub.userID === userID && sub.questionID === questionID
-   });
+   const existSubmissions = SUBMISSION.filter((sub) => (
+    sub.userID ===  parseInt(userID) && sub.questionID === questionID.toString()
+  ));
 
-   res.status(200).json(existSubmissions);
+   if(existSubmissions.length > 0){
+    res.status(200).json(existSubmissions);
+    return;
+   }
 
-  res.send("Hello World from route 4!")
+  res.send("Hello World from route 4! But you got no data in submissions")
 });
 
 
@@ -206,6 +220,8 @@ app.post('/admin/problems', (req, res) => {
 
   res.status(200).send('Added Problem');
 })
+
+
 
 app.listen(port, function() {
   console.log(`Your app listening on port ${port}`)
